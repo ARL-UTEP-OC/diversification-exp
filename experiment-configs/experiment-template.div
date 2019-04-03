@@ -3,7 +3,7 @@
 	    "experiment-name": "000",
 	    "amoeba-path": "/home/research/research/Amoeba/src/",
 		"amoeba-bin-outpath": "/home/research/amoeba-out/",
-		"amoeba-iterations": "2",
+		"amoeba-iterations": [1,2],
 		"_amoega-alg-choices": ["let il' = bb_rod_div#visit il' in", "let il' = bb_spt_div#visit il' in", "let il' = ins_gar_div#visit il' in", "let il' = ins_rpl_div#visit il' in", "let il' = func_rod_div#visit il' in", "let il' = bb_opq_div#visit il' in", "let il' = func_inline_div#visit  il' in", "let il' = bb_meg_div#visit il' in", "let il' = bb_fln_div#visit il' in", "let il' = bb_bfn_div#visit il' in"],
 		"amoeba-algs": ["let il' = bb_bfn_div#visit il' in"],
 		"amoeba-template-path": "/home/research/div_experimentation/templates/",
@@ -11,24 +11,8 @@
 		"perf-out-path": "/home/research/amoeba-out/"
 	}],
 	"config": [{
-			"bin-name": "/home/research/research/coreutils-8.15/src/sha512sum",
-			"bin-arguments": "/home/research/research/coreutils-8.15/src/sha512sum"
-		},
-		{
-			"bin-name": "/home/research/research/coreutils-8.15/src/base64",
-			"bin-arguments": "/home/research/research/coreutils-8.15/src/base64"
-		},
-		{
-			"bin-name": "/home/research/research/coreutils-8.15/src/ls",
-			"bin-arguments": "/ -iR"
-		},
-		{
-			"bin-name": "/home/research/research/coreutils-8.15/src/shred",
-			"bin-arguments": "large-shred.blank"
-		},
-		{
 			"bin-name": "/home/research/research/coreutils-8.15/src/cp",
-			"bin-arguments": "large-shred.blank large-shred.blank.cp"
+			"bin-arguments": "/home/research/research/Amoeba/src/large-shred.blank /home/research/research/Amoeba/src/large-shred.blank.cp"
 		}
 ]
 }

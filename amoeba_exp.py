@@ -5,8 +5,10 @@ import os
 import shutil
 import shlex
 import sys
+import time
 from jinja2 import Environment, FileSystemLoader
 from subprocess import Popen
+import subprocess
 
 def readExperimentFile(filename):
 	logging.debug("readExperimentFile() instantiated")
@@ -19,7 +21,7 @@ def readExperimentFile(filename):
 		logging.debug("experiment-name: " + g['experiment-name'])
 		logging.debug("amoeba-path: " + g['amoeba-path'])
 		logging.debug("amoeba-bin-outpath: " + g['amoeba-bin-outpath'])
-		logging.debug("amoeba-iterations: " + g['amoeba-iterations'])
+		logging.debug("amoeba-iterations: " + str(g['amoeba-iterations']))
 		logging.debug("amoeba-algs: " + str(g['amoeba-algs']))			
 		logging.debug("amoeba-template-path: " + g['amoeba-template-path'])	
 		logging.debug("perf-events: " + g['perf-events'])
@@ -27,6 +29,9 @@ def readExperimentFile(filename):
 
 		#change working directory to Amoeba
 		os.chdir(g['amoeba-path'])
+		
+		#get the maximum iteration, since amoeba keeps all copies 
+		maxIteration = max(g['amoeba-iterations'])
 
 		#embed the diversification algorithm choice
 		alg=g['experiment-name']
@@ -34,7 +39,7 @@ def readExperimentFile(filename):
 		genAlgs(g['amoeba-algs'], g['amoeba-template-path'], "ail.ml")
 		#recompile amoeba
 		compileAmoeba()
-		
+				
 		for p in experiment['config']:
 			logging.debug("Entry: " + str(p))
 			logging.debug("bin-name: " + p['bin-name'])
@@ -45,14 +50,16 @@ def readExperimentFile(filename):
 			outfilename = os.path.join(g['perf-out-path'],binfilename+".perf")
 			logging.info("Running performance analysis on: " + p['bin-name'])
 			runPerfAnalyze(p['bin-name'], p['bin-arguments'], g['perf-events'], outfilename)
-		
+				
 				#create outfilename and diversify
-			doutfilename = os.path.join(g['amoeba-bin-outpath'],binfilename+"."+g['amoeba-iterations']+"."+str(alg)+".diversified")
-			runAmoeba(p['bin-name'], g['amoeba-algs'], g['amoeba-iterations'], doutfilename)
+			#doutfilename = os.path.join(g['amoeba-bin-outpath'],binfilename+"."+g['amoeba-iterations']+"."+str(alg)+".diversified")
+			runAmoeba(p['bin-name'], g['experiment-name'], g['amoeba-iterations'], g['amoeba-bin-outpath'])
 				#create outfilename and run analysis on diversified
-			outfilename = os.path.join(g['perf-out-path'],binfilename+"."+g['amoeba-iterations']+"."+str(alg)+".diversified.perf")
-			logging.info("Running performance analysis on: " + doutfilename)
-			runPerfAnalyze(doutfilename, p['bin-arguments'], g['perf-events'], outfilename)
+			for iteration in g['amoeba-iterations']:
+				amoebafilename = os.path.join(g['amoeba-bin-outpath'],binfilename+"."+str(iteration)+"."+str(g['experiment-name'])+".diversified")
+				perfoutfilename = os.path.join(g['perf-out-path'],binfilename+"."+str(iteration)+"."+str(g['experiment-name'])+".diversified.perf")
+				logging.info("Running performance analysis on: " + amoebafilename)
+				runPerfAnalyze(amoebafilename, p['bin-arguments'], g['perf-events'], perfoutfilename)
 
 def genAlgs(algs, templatepath, outfile):
 	logging.debug("genAlgs() instantiated")
@@ -65,49 +72,44 @@ def genAlgs(algs, templatepath, outfile):
 	with open(outfile, "w") as out:
 		out.write(env.get_template("ail.ml.jnj2").render(jinjaAlgs=algs))
 	
-	
 def compileAmoeba():
 	logging.debug("compileAmoeba() instantiated")
-	#sudo opam switch 4.01.0
-	compileCmd = "opam switch 4.01.0"
-	logging.debug("compileAmoeba(): running command " + compileCmd)
-	process = Popen(shlex.split(compileCmd))
-	process.wait()
-	#eval `opam config env`
-	compileCmd = "eval `opam config env`"
-	logging.debug("compileAmoeba(): running command " + compileCmd)
-	process = Popen(shlex.split(compileCmd), shell=True)
-	process.wait()
-	#./build
+	env_vars = os.environ.copy()
 	compileCmd = "./build"
 	logging.debug("compileAmoeba(): running command " + compileCmd)
-	process = Popen(shlex.split(compileCmd), shell=True)
+	process = Popen(shlex.split(compileCmd), env=env_vars, shell=True)
 	process.wait()
 	
-def runAmoeba(binname, algorithm, iterations, outname):
+def runAmoeba(binname, experimentName, iterations, outpath):
 	logging.debug("runAmoeba() instantiated")
 	try:
+		maxIterations = max(iterations)
 		binpath, binfilename = os.path.split(binname)
 		if not os.path.exists(binpath):
 			logging.info("runAmoeba(): outputpath directory does not exist, creating: " + binpath)
 			os.makedirs(binpath)
 		
-		outpath, outfilename = os.path.split(outname)
 		if not os.path.exists(outpath):
 			logging.info("runAmoeba(): outputpath directory does not exist, creating: " + outpath)
 			os.makedirs(outpath)
 		
-		amoebaCmd = "python amoeba.py " + "-i " + iterations + " " + binname
+		amoebaCmd = "python amoeba.py " + "-i " + str(maxIterations) + " " + binname
 		logging.debug("runAmoeba(): running command " + amoebaCmd)
 		process = Popen(shlex.split(amoebaCmd))
 		process.wait()
 		
+		#get the latest folder (contains all iterations)
+		folders = [(x[0], time.ctime(x[1].st_ctime)) for x in sorted([(fn, os.stat(fn)) for fn in os.listdir(".") if os.path.isdir(fn) and "test" in fn], key = lambda x: x[1].st_ctime)]
+		latest_path = str(folders[-1][0])
 		logging.debug("runAmoeba(): amoeba execution complete " + binname)
-		logging.debug("runAmoeba(): moving output file to outpath " + binfilename + " TO " + outname)
-		
-		#Amoeba places the diversified file in the cwd, we need to move it to the desired location
-		shutil.move(binfilename, outname)
-		logging.debug("runAmoeba(): move completed")
+		for iteration in iterations:
+			genFile = os.path.join(latest_path,binfilename + "." + str(iteration))
+			#os.path.join(g['amoeba-bin-outpath'],binfilename+"."+g['amoeba-iterations']+"."+str(alg)+".diversified")
+			outFile = str(outpath) + str(binfilename) + "." + str(iteration) + "." + str(experimentName) + ".diversified"
+			logging.debug("runAmoeba(): copying output file "+genFile+" to outpath " + " TO " + outFile)
+			#Amoeba places the diversified file in the cwd, we need to move it to the desired location
+			shutil.copy(genFile, outFile)
+			logging.debug("runAmoeba(): copy completed")
 		
 	except Exception as e:
 		logging.error("An error occured" + str(e))

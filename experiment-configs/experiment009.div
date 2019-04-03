@@ -3,7 +3,7 @@
 	    "experiment-name": "009",
 		"amoeba-path": "/home/research/research/Amoeba/src/",
 		"amoeba-bin-outpath": "/home/research/amoeba-out/",
-		"amoeba-iterations": "10",
+		"amoeba-iterations": [10, 25, 50],
 		"_amoega-alg-choices": ["let il' = bb_rod_div#visit il' in", "let il' = bb_spt_div#visit il' in", "let il' = ins_gar_div#visit il' in", "let il' = ins_rpl_div#visit il' in", "let il' = func_rod_div#visit il' in", "let il' = bb_opq_div#visit il' in", "let il' = func_inline_div#visit  il' in", "let il' = bb_meg_div#visit il' in", "let il' = bb_fln_div#visit il' in", "let il' = bb_bfn_div#visit il' in"],
 		"amoeba-algs": ["let il' = bb_fln_div#visit il' in"],
 		"amoeba-template-path": "/home/research/div_experimentation/templates/",

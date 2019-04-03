@@ -12,7 +12,7 @@ def run_configs(foldername):
 	exp_files = [f for f in listdir(foldername) if isfile(join(foldername, f))]
 
 	for filename in exp_files:
-		runCmd = "/home/research/div_experimentation/amoeba_exp.py " + join(foldername,filename)
+		runCmd = "./Amoeba_Exp.sh " + join(foldername,filename)
 		
 		logging.debug("run_configs(): running command " + runCmd)
 		process = Popen(shlex.split(runCmd))
