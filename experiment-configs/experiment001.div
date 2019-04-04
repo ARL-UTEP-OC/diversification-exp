@@ -11,24 +11,24 @@
 		"perf-out-path": "/home/research/amoeba-out/"
 	}],
 	"config": [{
-			"bin-name": "/home/research/research/coreutils-8.15/src/sha512sum",
-			"bin-arguments": "/home/research/research/coreutils-8.15/src/sha512sum"
+			"bin-name": "/home/research/research/coreutils_bin_815_new_32/sha512sum",
+			"bin-arguments": "/home/research/research/coreutils_bin_815_new_32/sha512sum"
 		},
 		{
-			"bin-name": "/home/research/research/coreutils-8.15/src/base64",
-			"bin-arguments": "/home/research/research/coreutils-8.15/src/base64"
+			"bin-name": "/home/research/research/coreutils_bin_815_new_32/base64",
+			"bin-arguments": "/home/research/research/coreutils_bin_815_new_32/base64"
 		},
 		{
-			"bin-name": "/home/research/research/coreutils-8.15/src/ls",
+			"bin-name": "/home/research/research/coreutils_bin_815_new_32/ls",
 			"bin-arguments": "/ -iR"
 		},
 		{
-			"bin-name": "/home/research/research/coreutils-8.15/src/shred",
+			"bin-name": "/home/research/research/coreutils_bin_815_new_32/shred",
 			"bin-arguments": "large-shred.blank"
 		},
 		{
-			"bin-name": "/home/research/research/coreutils-8.15/src/cp",
-			"bin-arguments": "large-shred.blank large-shred.blank.cp"
+			"bin-name": "/home/research/research/coreutils_bin_815_new_32/cp",
+			"bin-arguments": "/home/research/research/Amoeba/src/large-shred.blank /home/research/research/Amoeba/src/large-shred.blank.cp"
 		}
 ]
 }
